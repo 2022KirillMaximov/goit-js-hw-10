@@ -2,7 +2,7 @@ import { fetchBreeds, fetchCatByBreed } from './cat-api';
 import { Report } from 'notiflix';
 import { Loading } from 'notiflix';
 
-const breedSelect = document.querySelector('breed-select');
+const breedSelect = document.querySelector('.breed-select');
 const catInfo = document.querySelector('.cat-info');
 
 fetchBreeds()
@@ -19,7 +19,7 @@ fetchBreeds()
     Report.failure('Oops!', 'Something went wrong! Try reloading the page!');
   });
 
-breedSelect.addEventListener('change', e => {
+breedSelect.addEventListener( 'change', e => {
   e.preventDefault();
   Loading.standard('Loading data, please wait...');
   const breedSelectId = breedSelect.value;
