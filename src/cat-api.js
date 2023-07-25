@@ -1,6 +1,6 @@
 import { Report } from 'notiflix/build/notiflix-report-aio';
-import axios from "axios";
-axios.defaults.headers.common["x-api-key"] = 
+import axios from 'axios';
+axios.defaults.headers.common['x-api-key'] =
   'live_d3juQjfyw1lSAXigGoGpeVy5Z1AMGbZmspKxRrENA6ezAYoETgbdtVbXTFHuBcr6';
 axios.defaults.baseURL = 'https://api.thecatapi.com/v1/';
 

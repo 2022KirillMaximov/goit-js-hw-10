@@ -1,9 +1,8 @@
-
 import { fetchBreeds, fetchCatByBreed } from './cat-api';
-import { Report } from 'notiflix/build/notiflix-report-aio';
-import { Loading } from 'notiflix/build/notiflix-loading-aio';
+import { Report } from 'notiflix';
+import { Loading } from 'notiflix';
 
-const breedSelect = document.querySelector('.breed-select');
+const breedSelect = document.querySelector('breed-select');
 const catInfo = document.querySelector('.cat-info');
 
 fetchBreeds()
