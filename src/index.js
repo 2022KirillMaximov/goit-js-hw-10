@@ -1,41 +1,76 @@
+import SlimSelect from 'slim-select';
+import 'slim-select/dist/slimselect.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchBreeds, fetchCatByBreed } from './cat-api';
-import { Report } from 'notiflix';
-import { Loading } from 'notiflix';
 
-const breedSelect = document.querySelector('.breed-select');
-const catInfo = document.querySelector('.cat-info');
+const bodyEl = document.querySelector('body');
 
-fetchBreeds()
-  .then(data => {
-    console.log(data);
+const refs = {
+  selectBreedEl: findRef(bodyEl.children, 'breed-select'),
+  loaderEl: findRef(bodyEl.children, 'wrapper-loader'),
+  errorEl: findRef(bodyEl.children, 'error'),
+  breedInfoEl: findRef(bodyEl.children, 'cat-info'),
+};
 
-    const option = data.map(
-      ({ id, name }) => `<option value="${id}">${name}</option>`
+hideElement(refs.errorEl, refs.selectBreedEl);
+
+window.addEventListener('load', onLoad);
+refs.selectBreedEl.addEventListener('change', onSelect);
+function showElement(...elems) {
+  elems.forEach(i => i.classList.remove('hidden'));
+}
+
+function onLoad() {
+  fetchBreeds('/breeds')
+    .then(data => {
+      refs.selectBreedEl.innerHTML = createMarkupSelect(data);
+      new SlimSelect({
+        select: '.breed-select',
+      });
+      hideElement(refs.loaderEl, refs.selectBreedEl);
+    })
+    .catch(() =>
+      Notify.failure('Oops! Something went wrong! Try reloading the page!')
     );
-    breedSelect.innerHTML = option;
-    Loading.remove();
-  })
-  .catch(() => {
-    Report.failure('Oops!', 'Something went wrong! Try reloading the page!');
-  });
+}
 
-breedSelect.addEventListener( 'change', e => {
-  e.preventDefault();
-  Loading.standard('Loading data, please wait...');
-  const breedSelectId = breedSelect.value;
-  fetchCatByBreed(breedSelectId)
-    .then(cat => {
-      Loading.remove();
-      const info = `
-		<div class='thumb-pic'><img src="${cat.url}" alt="${cat.id}" width=400></div>
-		<div class='thumb'>
-		<h2>${cat.breeds[0].name}</h2>
-		<p>${cat.breeds[0].description}</p>
-		<p><b>Temperament:</b> ${cat.breeds[0].temperament}</p>
-		</div>`;
-      catInfo.innerHTML = info;
+function onSelect(evt) {
+  hideElement(refs.breedInfoEl); 
+  showElement(refs.loaderEl); 
+
+  fetchCatByBreed('images/search', evt.target.value)
+    .then(resp => {
+      refs.breedInfoEl.innerHTML = createMarkupInfo(resp[0]);
+      refs.breedInfoEl.style.display = 'flex';
+      refs.breedInfoEl.style.gap = '20px';
+      hideElement(refs.loaderEl);
     })
     .catch(() => {
-      Report.failure('Oops!', 'Something went wrong! Try reloading the page!');
+      Notify.failure('Oops! Something went wrong! Try reloading the page!');
+      hideElement(refs.loaderEl); 
     });
-});
+}
+
+function createMarkupSelect(arr) {
+  return (
+    '<option value="" disabled selected>Choose your cat...</option>' +
+    arr.map(({ id, name }) => `<option value=${id}>${name}</option>`).join('')
+  );
+}
+
+function createMarkupInfo({ url, breeds }) {
+  const { name, temperament, description } = breeds[0];
+  return `<img src="${url}" alt="${name}" width = 450>
+      <div><h2>Breed: ${name}</h2>
+      <h3>Temperament: ${temperament}</h3>
+      <h4>Description</h4>
+      <p>${description}</p></div>`;
+}
+
+function hideElement(...elems) {
+  elems.forEach(i => i.classList.toggle('hidden'));
+}
+
+function findRef(queryEl, classN) {
+  return [...queryEl].find(i => i.className === classN);
+}
